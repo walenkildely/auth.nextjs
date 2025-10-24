@@ -56,7 +56,7 @@ export function RegisterForm({ ...props }: React.ComponentProps<typeof Card>) {
   }
 
  async function onSubmit(data: FieldValues) {
-    const res = await fetch('https://apis.codante.io/api/register-user/register', 
+    const res = await fetch('/api/register', 
      {method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -180,9 +180,6 @@ export function RegisterForm({ ...props }: React.ComponentProps<typeof Card>) {
                 type="submit"
                 disabled={isSubmitting}>
                   {isSubmitting ? <Loader className="animate-spin"/> : 'Criar uma conta'}
-                </Button>
-                <Button variant="outline" type="button">
-                 Cadastre-se com o Google
                 </Button>
                 <FieldDescription className="px-6 text-center">
                   Já tem uma conta? <a href="#">Entrar</a>
