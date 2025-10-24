@@ -20,7 +20,10 @@ import {  EyeIcon, EyeOffIcon, Loader } from "lucide-react"
 import React, { useState } from "react"
 import {FieldValues, useForm } from "react-hook-form"
 import { useHookFormMask } from "use-mask-input"
-import {ErrorMessage} from '@hookform/error-message'
+import {zodResolver} from '@hookform/resolvers/zod'
+import type { UserRegister } from "@/schema"
+import {userRegisterSchema} from "@/schema"
+
 
 
 
@@ -34,7 +37,8 @@ export function RegisterForm({ ...props }: React.ComponentProps<typeof Card>) {
     handleSubmit,
     register,
     setValue,
-    formState:{isSubmitting, errors}} = useForm();
+
+    formState:{isSubmitting, errors}} = useForm({resolver:zodResolver(userRegisterSchema)});
 
     const registerWithMask = useHookFormMask(register);
 
@@ -81,16 +85,10 @@ export function RegisterForm({ ...props }: React.ComponentProps<typeof Card>) {
               <Input
                type="text"
                id="name"
-                {...register("name",
-                  {required: "O campo nome precisa ser preenchido",
-                  maxLength: {
-                    value: 100,
-                  message:" nome não pode ter mais de 100 caracteres",
-                  },
-                })}
+                {...register("name")}
                 />
                 <FieldDescription className="text-red-500" >
-                  <ErrorMessage errors={errors} name="name" />
+                  {errors.name?.message as string}
                 </FieldDescription>
       
             </Field>
@@ -98,33 +96,19 @@ export function RegisterForm({ ...props }: React.ComponentProps<typeof Card>) {
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
                 id="email"
-                {...register('email',
-                  {required: 'O campo email precisa ser preenchido',
-                  pattern: {
-                    value:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                    message: 'Por favor, insira um email válido',
-                  },
-                }
-                )} 
+                {...register('email')}
                 type="email"
                 placeholder="m@example.com"
-              />
+                />
               <FieldDescription className="text-red-500" >
-                 <ErrorMessage errors={errors} name="email" />
+                 {errors.email?.message as string}
                 </FieldDescription>
             </Field>
               <Field className="relative">
               <FieldLabel htmlFor="password">senha</FieldLabel>
               <Input 
                 id="password"
-                {...register('password', {
-                required: 'a senha precisa ser preenchida',
-                  minLength: {
-                    value: 8,
-                    message: 'A senha deve ter pelo menos 8 caracteres',
-                  },
-                }
-                )}
+                {...register('password')}
                 type={isPasswordVisible ? 'text' : 'password'}
                 className="pr-10"
                 />
@@ -139,7 +123,7 @@ export function RegisterForm({ ...props }: React.ComponentProps<typeof Card>) {
                 </button>
               </span>
               <FieldDescription className="text-red-500" >
-                  <ErrorMessage errors={errors} name="password" />
+                  {errors.password?.message as string}
                 </FieldDescription>
             </Field>
             
@@ -148,15 +132,8 @@ export function RegisterForm({ ...props }: React.ComponentProps<typeof Card>) {
                 Confirma senha
               </FieldLabel>
               <Input id="confirm-password"
-              {...register('password_confirmation', {
-                required: 'A confirmação de senha precisa ser preenchida',
-                  minLength: {
-                    value: 8,
-                    message: 'A senha deve ter pelo menos 8 caracteres',
-                  },
-                }
-                )}
-              type={isPasswordVisible ? 'text' : 'password'}  />
+              {...register('password_confirmation')}
+              type={isPasswordVisible ? 'text' : 'password'} />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-end">
                 <button type="button" onClick={() => setIsPasswordVisible (!isPasswordVisible)}
                  >
@@ -168,31 +145,26 @@ export function RegisterForm({ ...props }: React.ComponentProps<typeof Card>) {
                 </button>
               </span>
               <FieldDescription className="text-red-500" >
-                  <ErrorMessage errors={errors} name="password_confirmation" />
+                  {errors.password_confirmation?.message as string}
                 </FieldDescription>
             </Field>
 
             <Field>
               <FieldLabel htmlFor="cep">CEP</FieldLabel>
-              <Input id="cep"
-              {...registerWithMask('zipcode', '99999-999',{
-                required: 'O campo CEP precisa ser preenchido',
-                pattern: {
-                  value: /^\d{5}-\d{3}$/,
-                  message: 'Por favor, insira um CEP válido',
-                },
-                onBlur: handleZipCodeBlur,
-              })}
+              <Input 
+              id="cep"
+              {...registerWithMask('zipcode', '99999-999')}
+              onBlur={handleZipCodeBlur}
               type="text" />
 
               <FieldDescription className="text-red-500" >
-                <ErrorMessage errors={errors} name="zipcode" />
+                {errors.zipcode?.message as string}
                 </FieldDescription>
             </Field>
 
             <Field>
               <FieldLabel htmlFor="city">Cidade</FieldLabel>
-              <Input id="city" type="text" required disabled className="disabled:bg-slate-200" 
+              <Input id="city" type="text" required disabled className="disabled:bg-slate-200"
               {...register('city')} />
             </Field>
 
