@@ -25,8 +25,13 @@ import type { UserRegister } from "@/schema"
 import {userRegisterSchema} from "@/schema"
 
 
-
-
+try {
+      if (isSignUp) {
+ const result = await signUp<UserRegister>( email, password, name, zipcode, city, state );
+            if (!result.user){
+                setError("Erro ao criar a conta. Verifique os dados e tente novamente." );
+            }
+      
 
 export function RegisterForm({ ...props }: React.ComponentProps<typeof Card>) {
 
@@ -38,7 +43,7 @@ export function RegisterForm({ ...props }: React.ComponentProps<typeof Card>) {
     register,
     setValue,
 
-    formState:{isSubmitting, errors}} = useForm({resolver:zodResolver(userRegisterSchema)});
+    formState:{isSubmitting, errors}} = useForm<UserRegister>({resolver:zodResolver(userRegisterSchema)});
 
     const registerWithMask = useHookFormMask(register);
 

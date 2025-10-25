@@ -35,3 +35,4 @@ export const userRegisterSchema = z.object({
 
 
 export type UserRegister = z.infer<typeof userRegisterSchema>;
+
