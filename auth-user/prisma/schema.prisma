@@ -1,4 +1,3 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,27 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/**
- * Usuário da aplicação
- * Campos extras: name, zipcode, city, state
- */
+/// *
+///  * Usuário da aplicação
+///  * Campos extras: name, zipcode, city, state
 model User {
   id            String    @id @default(cuid())
   name          String
   zipcode       String
   city          String
   state         String
+  role          String    @default("USER")
   email         String    @unique
   emailVerified Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
-  sessions      Session[]
   accounts      Account[]
+  sessions      Session[]
 
   @@map("user")
 }
-
 
 model Session {
   id        String   @id @default(cuid())
@@ -38,9 +35,8 @@ model Session {
   updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
-
-  userId String
-  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([expiresAt])
@@ -51,29 +47,13 @@ model Account {
   id         String   @id @default(cuid())
   providerId String
   accountId  String
-
-  userId String
-  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  password   String?
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, accountId])
   @@index([userId])
   @@map("account")
 }
-
-
-// model Verification {
-//   id         String   @id @default(cuid())
-//   identifier String
-//   value      String
-//   expiresAt  DateTime
-//   createdAt  DateTime @default(now())
-//   updatedAt  DateTime @updatedAt
-
-//   @@index([identifier])
-//   @@index([expiresAt])
-//   @@map("verification")
-// }

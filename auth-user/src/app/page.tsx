@@ -1,10 +1,15 @@
+import { LoginForm } from "@/components/login/form";
 
-
-export default function Home() {
+ 
+ export default async function Login() {
   return (
-   <div>
-      <h1>Welcome to the Auth User App</h1>
-      <p>This is the home page.</p>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+    <LoginForm/>
     </div>
-  );
+  </div>
+    );
 }
+
+
+
