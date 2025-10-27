@@ -30,14 +30,10 @@ export default function DashboardClient({ session }: Props) {
   const router = useRouter();
   const user = session.user;
 
-  // Se quiser tratar ADMIN aqui (recomendo fazer no server page.tsx)
-  // useEffect(() => {
-  //   if (user.role === "ADMIN") router.replace("/admin");
-  // }, [user.role, router]);
 
   const handleSignOut = async () => {
     await signOut();
-    router.replace("/"); // navegação suave; se preferir hard reload: window.location.href = "/"
+    router.replace("/"); 
   };
 
   return (
