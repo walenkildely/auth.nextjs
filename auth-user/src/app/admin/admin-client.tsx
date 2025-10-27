@@ -22,8 +22,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ErrorMessage } from "@/components/feedbacks/error-message";
-import { Loader, EyeIcon, EyeOffIcon } from "lucide-react";
+import { ErrorMessage } from "@/components/error-message";
+import { Loader, EyeIcon, EyeOffIcon, User, Mail, MapPin, Shield, Calendar } from "lucide-react";
+import { PasswordToggle } from "@/components/passwordToggle";
 
 interface User {
   id: string;
@@ -47,7 +48,7 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
   const [loading, setLoading] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editName, setEditName] = useState("");
-  const [editPassword, setEditPassword] = useState(""); // ← FALTAVA ESTE ESTADO
+  const [editPassword, setEditPassword] = useState(""); 
   const [deleteConfirm, setDeleteConfirm] = useState<User | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [editError, setEditError] = useState("");
@@ -80,8 +81,8 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
   const handleEdit = (user: User) => {
     setEditingUser(user);
     setEditName(user.name);
-    setEditPassword(""); // Limpa a senha
-    setEditError(""); // Limpa erros anteriores
+    setEditPassword("");
+    setEditError("");
   };
 
   const handleSaveEdit = async () => {
@@ -93,7 +94,6 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
     try {
       const body: any = { name: editName };
       
-      // Só envia senha se foi preenchida
       if (editPassword && editPassword.trim() !== "") {
         body.password = editPassword;
       }
@@ -106,7 +106,7 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
 
       if (response.ok) {
         await fetchUsers();
-        router.refresh(); // Atualiza dados do servidor
+        router.refresh();
         setEditingUser(null);
         setEditName("");
         setEditPassword("");
@@ -136,7 +136,7 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
 
       if (response.ok) {
         await fetchUsers();
-        router.refresh(); // Atualiza dados do servidor
+        router.refresh();
         setDeleteConfirm(null);
       } else {
         const errorData = await response.json().catch(() => ({}));
@@ -156,28 +156,43 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Painel Administrativo</h1>
-            <p className="text-sm text-gray-600 mt-1">
-              Logado como: {session.user.name} ({session.user.email})
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 max-w-7xl">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-6 sm:mb-8">
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+              Painel Administrativo
+            </h1>
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600">
+              <User className="w-4 h-4" />
+              <span className="truncate max-w-[200px] sm:max-w-none">
+                {session.user.name}
+              </span>
+              <span className="hidden sm:inline">•</span>
+              <span className="truncate max-w-[150px] sm:max-w-none">
+                {session.user.email}
+              </span>
+            </div>
           </div>
-          <Button onClick={handleSignOut} variant="outline">
+          <Button 
+            onClick={handleSignOut} 
+            variant="outline"
+            className="w-full sm:w-auto shadow-sm hover:shadow-md transition-shadow"
+          >
             Sair
           </Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Gerenciar Usuários</CardTitle>
-            <CardDescription>
+        {/* Main Card */}
+        <Card className="shadow-xl border-0 bg-white/80 backdrop-blur">
+          <CardHeader className="space-y-1 pb-4">
+            <CardTitle className="text-xl sm:text-2xl">Gerenciar Usuários</CardTitle>
+            <CardDescription className="text-sm sm:text-base">
               Visualize, edite e delete usuários do sistema
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-3 sm:px-6">
             {errorMessage && (
               <ErrorMessage 
                 message={errorMessage} 
@@ -186,32 +201,54 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
             )}
             
             {loading && (
-              <div className="flex justify-center items-center py-8">
-                <Loader className="animate-spin mr-2" size={20} />
-                <p className="text-gray-500">Carregando usuários...</p>
+              <div className="flex justify-center items-center py-12">
+                <div className="text-center space-y-3">
+                  <Loader className="animate-spin mx-auto text-blue-600" size={32} />
+                  <p className="text-slate-500 text-sm">Carregando usuários...</p>
+                </div>
               </div>
             )}
             
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {users.map((user) => (
                 <div key={user.id}>
-                  <div className="flex items-center justify-between p-4 bg-white rounded-lg border">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg">{user.name}</h3>
-                      <p className="text-sm text-gray-600">{user.email}</p>
-                      <p className="text-sm text-gray-500">
-                        CEP: {user.zipcode} | {user.city} - {user.state}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        Função: {user.role === "ADMIN" ? "Administrador" : "Usuário"}
-                      </p>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-5 bg-gradient-to-br from-white to-slate-50 rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-md transition-all duration-200">
+                    <div className="flex-1 space-y-2 mb-4 sm:mb-0">
+                      <div className="flex items-start gap-2">
+                        <User className="w-5 h-5 text-slate-400 mt-0.5 flex-shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold text-base sm:text-lg text-slate-900 truncate">
+                            {user.name}
+                          </h3>
+                          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 mt-1">
+                            <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span className="truncate">{user.email}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-1.5 text-xs sm:text-sm text-slate-500 pl-7">
+                        <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span className="truncate">
+                          CEP: {user.zipcode} | {user.city} - {user.state}
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-1.5 pl-7">
+                        <Shield className={`w-3.5 h-3.5 ${user.role === "ADMIN" ? "text-amber-500" : "text-slate-400"}`} />
+                        <span className={`text-xs font-medium ${user.role === "ADMIN" ? "text-amber-600" : "text-slate-500"}`}>
+                          {user.role === "ADMIN" ? "Administrador" : "Usuário"}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
+                    
+                    <div className="flex gap-2 sm:ml-4">
                       <Button
                         onClick={() => handleEdit(user)}
                         variant="outline"
                         size="sm"
                         disabled={loading}
+                        className="flex-1 sm:flex-none hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 transition-colors"
                       >
                         Editar
                       </Button>
@@ -219,24 +256,28 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
                         <Button
                           onClick={() => {
                             setDeleteConfirm(user);
-                            setDeleteError(""); // Limpa erros anteriores
+                            setDeleteError("");
                           }}
                           variant="destructive"
                           size="sm"
                           disabled={loading}
+                          className="flex-1 sm:flex-none hover:bg-red-600 transition-colors"
                         >
                           Deletar
                         </Button>
                       )}
                     </div>
                   </div>
-                  <Separator className="my-2" />
+                  {users.indexOf(user) < users.length - 1 && (
+                    <Separator className="my-3 sm:my-4" />
+                  )}
                 </div>
               ))}
               {users.length === 0 && !loading && !errorMessage && (
-                <p className="text-center text-gray-500 py-8">
-                  Nenhum usuário encontrado
-                </p>
+                <div className="text-center py-12">
+                  <User className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+                  <p className="text-slate-500 text-sm">Nenhum usuário encontrado</p>
+                </div>
               )}
             </div>
           </CardContent>
@@ -254,61 +295,51 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
             }
           }}
         >
-          <DialogContent>
+          <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Editar Usuário</DialogTitle>
+              <DialogTitle className="text-xl">Editar Usuário</DialogTitle>
               <DialogDescription>
                 Altere as informações do usuário abaixo
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">Nome</Label>
+            <div className="space-y-5 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">Nome</Label>
                 <Input
                   id="name"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   disabled={isSaving}
+                  className="h-10"
                 />
               </div>
               
-              <div className="relative">
-                <Label htmlFor="password">Nova Senha (opcional)</Label>
-                <Input
-                  id="password"
-                  type={isPasswordVisible ? "text" : "password"}
-                  value={editPassword}
-                  onChange={(e) => setEditPassword(e.target.value)}
-                  placeholder="Deixe em branco para não alterar"
-                  className="pr-10"
-                  disabled={isSaving}
-                />
-                <span className="absolute right-3 top-9 flex items-center justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  Nova Senha (opcional)
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={isPasswordVisible ? "text" : "password"}
+                    value={editPassword}
+                    onChange={(e) => setEditPassword(e.target.value)}
+                    placeholder="Deixe em branco para não alterar"
+                    className="pr-10 h-10"
                     disabled={isSaving}
-                  >
-                    {isPasswordVisible ? (
-                      <EyeIcon
-                        size={20}
-                        className="text-slate-600 cursor-pointer"
-                      />
-                    ) : (
-                      <EyeOffIcon
-                        size={20}
-                        className="text-slate-600 cursor-pointer"
-                      />
-                    )}
-                  </button>
-                </span>
+                  />
+                  <PasswordToggle
+                    isVisible={isPasswordVisible}
+                    onToggle={() => setIsPasswordVisible(!isPasswordVisible)}
+                  />
+                </div>
               </div>
               
               {editError && (
                 <ErrorMessage message={editError} />
               )}
             </div>
-            <DialogFooter>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
               <Button 
                 variant="outline" 
                 onClick={() => {
@@ -318,16 +349,21 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
                   setIsPasswordVisible(false);
                 }}
                 disabled={isSaving}
+                className="w-full sm:w-auto"
               >
                 Cancelar
               </Button>
-              <Button onClick={handleSaveEdit} disabled={isSaving}>
+              <Button 
+                onClick={handleSaveEdit} 
+                disabled={isSaving}
+                className="w-full sm:w-auto"
+              >
                 {isSaving ? (
                   <>
                     <Loader className="animate-spin mr-2" size={16} />
                     Salvando...
                   </>
-                ) : "Salvar"}
+                ) : "Salvar Alterações"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -343,13 +379,14 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
             }
           }}
         >
-          <DialogContent>
+          <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Confirmar exclusão</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-xl text-red-600">Confirmar exclusão</DialogTitle>
+              <DialogDescription className="pt-2">
                 Tem certeza que deseja deletar o usuário{" "}
-                <strong>{deleteConfirm?.name}</strong>? Esta ação não pode ser
-                desfeita.
+                <strong className="text-slate-900">{deleteConfirm?.name}</strong>? 
+                <br />
+                <span className="text-red-600 font-medium">Esta ação não pode ser desfeita.</span>
               </DialogDescription>
             </DialogHeader>
             
@@ -357,7 +394,7 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
               <ErrorMessage message={deleteError} />
             )}
             
-            <DialogFooter>
+            <DialogFooter className="flex-col sm:flex-row gap-2 pt-4">
               <Button 
                 variant="outline" 
                 onClick={() => {
@@ -365,16 +402,22 @@ export default function AdminClient({ initialUsers, session }: AdminClientProps)
                   setDeleteError("");
                 }}
                 disabled={isDeleting}
+                className="w-full sm:w-auto"
               >
                 Cancelar
               </Button>
-              <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              <Button 
+                variant="destructive" 
+                onClick={handleDelete} 
+                disabled={isDeleting}
+                className="w-full sm:w-auto"
+              >
                 {isDeleting ? (
                   <>
                     <Loader className="animate-spin mr-2" size={16} />
                     Deletando...
                   </>
-                ) : "Deletar"}
+                ) : "Deletar Usuário"}
               </Button>
             </DialogFooter>
           </DialogContent>

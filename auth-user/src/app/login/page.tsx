@@ -11,5 +11,3 @@ import { LoginForm } from "@/app/login/form";
     );
 }
 
-
-

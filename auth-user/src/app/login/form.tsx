@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -24,11 +25,10 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-
 import { signInSchema, type SignInInput } from "@/schema";
 
-
 import { useSession, signIn } from "@/lib/auth-client";
+import { PasswordToggle } from "@/components/passwordToggle";
 
 export function LoginForm({
   className,
@@ -39,6 +39,7 @@ export function LoginForm({
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const {
     register,
@@ -48,7 +49,6 @@ export function LoginForm({
     resolver: zodResolver(signInSchema),
   });
 
-  // Se já estiver logado, manda para /dashboard (no server você pode redirecionar ADMIN -> /admin)
   useEffect(() => {
     if (!isPending && session?.user) {
       router.replace("/dashboard");
@@ -56,42 +56,39 @@ export function LoginForm({
   }, [isPending, session, router]);
 
   const onSubmit = async (data: SignInInput) => {
-  try {
-    setIsLoading(true);
-    setErrorMessage("");
+    try {
+      setIsLoading(true);
+      setErrorMessage("");
 
-    const result = await signIn.email(
-      {
-        email: data.email,
-        password: data.password,
-      }
-    );
-
-    if (result.error) {
-      setErrorMessage(
-        result.error.message === "Invalid credentials"
-          ? "Email ou senha inválidos."
-          : result.error.message || "Erro ao fazer login. Tente novamente."
+      const result = await signIn.email(
+        {
+          email: data.email,
+          password: data.password,
+        }
       );
-      return;
+
+      if (result.error) {
+        setErrorMessage(
+          result.error.message === "Invalid credentials"
+            ? "Email ou senha inválidos."
+            :  "Erro ao fazer login. Tente novamente."
+        );
+        return;
+      }
+
+      window.location.href = "/dashboard";
+      
+    } catch (err: any) {
+      setErrorMessage(
+        err?.message === "Invalid credentials"
+          ? "Email ou senha inválidos."
+          : err?.message || "Erro ao fazer login. Tente novamente."
+      );
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    // Hard reload para garantir que o servidor carregue a sessão
-    window.location.href = "/dashboard";
-    
-  } catch (err: any) {
-    setErrorMessage(
-      err?.message === "Invalid credentials"
-        ? "Email ou senha inválidos."
-        : err?.message || "Erro ao fazer login. Tente novamente."
-    );
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-
-  // Evita piscar o form se já tem sessão
   if (!isPending && session?.user) return null;
 
   return (
@@ -123,11 +120,18 @@ export function LoginForm({
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Senha</FieldLabel>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  {...register("password")}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={isPasswordVisible ? "text" : "password"}
+                    className="pr-10 h-11"
+                    {...register("password")}
+                  />
+                   <PasswordToggle
+                    isVisible={isPasswordVisible}
+                    onToggle={() => setIsPasswordVisible(!isPasswordVisible)}
+                    />
+                </div>
                 <FieldDescription className="text-red-500">
                   {errors.password?.message}
                 </FieldDescription>

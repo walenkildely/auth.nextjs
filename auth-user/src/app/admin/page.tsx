@@ -1,21 +1,18 @@
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
+import { auth } from "@/lib/auth";
 import AdminClient from "./admin-client";
 
 const prisma = new PrismaClient();
 
 export default async function AdminPage() {
-  const session = await auth.api.getSession({ 
-    headers: await headers() 
-  });
-
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
   if (session.user.role !== "ADMIN") redirect("/dashboard");
 
-  // Buscar usuários no servidor (melhor performance)
   const users = await prisma.user.findMany({
+    orderBy: { createdAt: "desc" },
     select: {
       id: true,
       name: true,
@@ -25,9 +22,6 @@ export default async function AdminPage() {
       state: true,
       role: true,
       createdAt: true,
-    },
-    orderBy: {
-      createdAt: "desc",
     },
   });
 
