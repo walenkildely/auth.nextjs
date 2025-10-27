@@ -39,6 +39,7 @@ Este projeto é uma aplicação web de gerenciamento de usuários desenvolvida c
 ## Instalação e Execução
 
 ### Pré-requisitos
+
 - Node.js 18.x ou superior
 - npm ou yarn
 
@@ -57,25 +58,45 @@ npm install
 yarn install
 ```
 
-3. Configure o banco de dados:
+3. Configure as variáveis de ambiente:
+
+Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+
+```env
+# Database
+DATABASE_URL="file:./dev.db"
+
+# Better Auth (opcional - será gerado automaticamente se não fornecido)
+BETTER_AUTH_SECRET="your-secret-key-here"
+BETTER_AUTH_URL="http://localhost:3000"
+
+https://www.better-auth.com/docs/installation
+```
+
+> **Nota**: Para gerar uma chave secreta forte, você pode usar:
+> ```bash
+> openssl rand -base64 32
+> ```
+
+4. Configure o banco de dados:
 ```bash
 npx prisma migrate dev --name init
 npx prisma generate
 ```
 
-4. Execute o seed para criar o usuário administrador:
+5. Execute o seed para criar o usuário administrador:
 ```bash
 npx prisma db seed
 ```
 
-5. Inicie o servidor de desenvolvimento:
+6. Inicie o servidor de desenvolvimento:
 ```bash
 npm run dev
 # ou
 yarn dev
 ```
 
-6. Acesse a aplicação em `http://localhost:3000`
+7. Acesse a aplicação em `http://localhost:3000`
 
 ## Credenciais de Acesso
 
@@ -104,6 +125,13 @@ auth-user/
 │   └── schema.ts            # Schemas de validação com Zod
 └── ...
 ```
+
+## Variáveis de Ambiente
+
+
+| `DATABASE_URL` | URL de conexão com o banco de dados SQLite | `file:./dev.db` |
+| `BETTER_AUTH_SECRET` | Chave secreta para autenticação | `sua-chave-secreta-aqui` |
+| `BETTER_AUTH_URL` | URL base da aplicação| `http://localhost:3000` |
 
 ## Funcionalidades Adicionais Implementadas
 
